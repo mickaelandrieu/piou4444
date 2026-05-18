@@ -23,10 +23,11 @@ numéroté et daté.
 |---|---|---|---|
 | 001 | Vision produit initiale — Attention & Fonctionnement Cognitif Screener | livré (MVP) | 2026-05-18 |
 | 002 | Modèle économique & funnel de conversion | proposé | 2026-05-18 |
+| 003 | Qualité logicielle, CI/CD & garde-fous | proposé | 2026-05-18 |
 
 ## Liens utiles
 
 - README racine : démarrage, stack, scoring
-- `lib/questions.ts` : items ASRS v1.1 + questions contextuelles
-- `lib/scoring.ts` : seuils et logique de scoring
-- `lib/interpretation.ts` : textes pédagogiques et recommandations
+- `src/lib/questions.ts` : items ASRS v1.1 + questions contextuelles
+- `src/lib/scoring.ts` : seuils et logique de scoring
+- `src/lib/interpretation.ts` : textes pédagogiques et recommandations
