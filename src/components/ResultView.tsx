@@ -1,7 +1,5 @@
-"use client";
-
-import { Dimension } from "@/lib/questions";
-import { FullResult } from "@/lib/scoring";
+import type { Dimension } from "@/lib/questions";
+import type { FullResult } from "@/lib/scoring";
 import {
   buildBullets,
   DIMENSION_DESCRIPTION,

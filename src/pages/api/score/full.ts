@@ -1,16 +1,18 @@
-import { NextRequest, NextResponse } from "next/server";
+import type { APIRoute } from "astro";
 import { scoreFull } from "@/lib/scoring";
 
-export async function POST(req: NextRequest) {
-  const body = await req.json().catch(() => null);
+export const prerender = false;
+
+export const POST: APIRoute = async ({ request }) => {
+  const body = await request.json().catch(() => null);
   if (
     !body ||
     typeof body.asrsAnswers !== "object" ||
     typeof body.contextualAnswers !== "object"
   ) {
-    return NextResponse.json(
-      { error: "asrsAnswers et contextualAnswers requis" },
-      { status: 400 },
+    return new Response(
+      JSON.stringify({ error: "asrsAnswers et contextualAnswers requis" }),
+      { status: 400, headers: { "content-type": "application/json" } },
     );
   }
   const asrs: Record<number, number> = {};
@@ -27,5 +29,7 @@ export async function POST(req: NextRequest) {
     ctx[k] = n;
   }
   const result = scoreFull(asrs, ctx);
-  return NextResponse.json(result);
-}
+  return new Response(JSON.stringify(result), {
+    headers: { "content-type": "application/json" },
+  });
+};

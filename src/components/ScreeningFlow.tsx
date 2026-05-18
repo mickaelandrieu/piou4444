@@ -1,5 +1,3 @@
-"use client";
-
 import { useMemo, useState } from "react";
 import { Disclaimer } from "@/components/Disclaimer";
 import { ProgressBar } from "@/components/ProgressBar";
@@ -12,7 +10,7 @@ import {
   FULL_QUESTIONS,
   SCREENER_QUESTIONS,
 } from "@/lib/questions";
-import { FullResult, ScreenerResult } from "@/lib/scoring";
+import type { FullResult, ScreenerResult } from "@/lib/scoring";
 import { LEVEL_COLOR, LEVEL_LABEL, screenerSummary } from "@/lib/interpretation";
 
 type Stage =
@@ -25,7 +23,7 @@ type Stage =
 
 const PART_B_QUESTIONS = FULL_QUESTIONS.filter((q) => !q.partA);
 
-export default function Page() {
+export function ScreeningFlow() {
   const [stage, setStage] = useState<Stage>("intro");
   const [asrsAnswers, setAsrsAnswers] = useState<Record<number, number>>({});
   const [ctxAnswers, setCtxAnswers] = useState<Record<string, number>>({});

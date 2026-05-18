@@ -1,5 +1,3 @@
-"use client";
-
 type Choice = { value: number; label: string };
 
 export function QuestionCard({

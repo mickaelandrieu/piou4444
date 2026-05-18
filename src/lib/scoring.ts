@@ -1,9 +1,9 @@
 import {
   ASRS_QUESTIONS,
   CONTEXTUAL_QUESTIONS,
-  Dimension,
   SCREENER_QUESTIONS,
 } from "./questions";
+import type { Dimension } from "./questions";
 
 export type Level = "faible" | "modere" | "eleve";
 

@@ -22,24 +22,32 @@ screening validé scientifiquement.
 
 ## Architecture
 
-- **Frontend** : Next.js 14 (App Router) + React 18 + TypeScript + Tailwind CSS
-- **Backend** : API routes Next.js, moteur de scoring déterministe pur
-- **Stockage** : aucun (état client uniquement, anonymisation totale)
+- **Frontend** : Astro 5 + îlots React 18 + TypeScript + Tailwind CSS v4
+- **Hébergement cible** : Cloudflare Pages (adapter `@astrojs/cloudflare`)
+- **Backend** : endpoints API Astro (server-rendered), moteur de scoring
+  déterministe pur
+- **Stockage** : aucun pour 001 (état client uniquement, anonymisation totale).
+  Persistance introduite dans une spec ultérieure.
 
 ```
-app/
-  layout.tsx              wrapper + disclaimer permanent
-  page.tsx                flow : intro → screener → result → full → contextual → result
-  globals.css
-  api/
-    score/screener/route.ts   POST { answers } → ScreenerResult
-    score/full/route.ts       POST { asrsAnswers, contextualAnswers } → FullResult
-components/
-  Disclaimer.tsx, ProgressBar.tsx, QuestionCard.tsx, ResultView.tsx
-lib/
-  questions.ts            ASRS 18 items + 5 questions contextuelles
-  scoring.ts              moteur de scoring (screener + complet + dimensions)
-  interpretation.ts       textes pédagogiques + recommandations par niveau
+src/
+  pages/
+    index.astro                 page statique + îlot React de flow
+    api/
+      score/screener.ts         POST { answers } → ScreenerResult
+      score/full.ts             POST { asrsAnswers, contextualAnswers } → FullResult
+  layouts/
+    Layout.astro                wrapper + disclaimer permanent
+  components/
+    ScreeningFlow.tsx           îlot React : intro → screener → result → full → contextual → result
+    Disclaimer.tsx, ProgressBar.tsx, QuestionCard.tsx, ResultView.tsx
+  lib/
+    questions.ts                ASRS 18 items + 5 questions contextuelles
+    scoring.ts                  moteur de scoring (screener + complet + dimensions)
+    interpretation.ts           textes pédagogiques + recommandations par niveau
+  styles/
+    global.css                  Tailwind v4 + thème (couleurs brand/signal)
+astro.config.mjs                adapter Cloudflare + intégration React + plugin Tailwind
 ```
 
 ## Logique de scoring
@@ -78,7 +86,16 @@ npm install
 npm run dev
 ```
 
-Application disponible sur http://localhost:3000.
+Application disponible sur http://localhost:4321.
+
+Build production :
+
+```bash
+npm run build
+```
+
+Sortie dans `dist/`, déployable sur Cloudflare Pages (auto-détection
+build command `npm run build`, output directory `dist`).
 
 ## Évolutions possibles (V2+)
 

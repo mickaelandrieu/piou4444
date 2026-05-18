@@ -1,5 +1,5 @@
-import { Dimension } from "./questions";
-import { FullResult, Level, ScreenerResult } from "./scoring";
+import type { Dimension } from "./questions";
+import type { FullResult, Level, ScreenerResult } from "./scoring";
 
 export const LEVEL_LABEL: Record<Level, string> = {
   faible: "faible",
