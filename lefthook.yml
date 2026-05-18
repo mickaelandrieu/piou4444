@@ -1,0 +1,21 @@
+# lefthook — git hooks managed in repo
+# Documentation : https://github.com/evilmartians/lefthook
+
+pre-commit:
+  parallel: true
+  commands:
+    typecheck:
+      run: npm run typecheck
+
+    lint:
+      glob: "*.{ts,tsx}"
+      run: npx eslint --max-warnings 0 {staged_files}
+
+    tests-changed:
+      glob: "*.{ts,tsx}"
+      run: npx vitest run --changed --passWithNoTests
+
+pre-push:
+  commands:
+    full-build:
+      run: npm run build

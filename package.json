@@ -14,7 +14,8 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
-    "test:e2e:install": "playwright install --with-deps chromium"
+    "test:e2e:install": "playwright install --with-deps chromium",
+    "prepare": "lefthook install || true"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^12.0.0",
@@ -40,6 +41,7 @@
     "eslint": "^9.13.0",
     "eslint-plugin-security": "^3.0.1",
     "happy-dom": "^15.0.0",
+    "lefthook": "^1.7.0",
     "msw": "^2.4.0",
     "typescript": "5.5.3",
     "typescript-eslint": "^8.10.0",
