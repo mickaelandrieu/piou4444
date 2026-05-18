@@ -1,0 +1,16 @@
+# Gitleaks configuration
+# Documentation : https://github.com/gitleaks/gitleaks
+
+# Étend les rules par défaut de gitleaks (CVE, AWS keys, Stripe keys, etc.)
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Project-specific allowlist"
+paths = [
+  '''node_modules/.*''',
+  '''dist/.*''',
+  '''package-lock\.json$''',
+  '''coverage/.*''',
+  '''playwright-report/.*''',
+]

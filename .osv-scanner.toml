@@ -1,0 +1,12 @@
+# OSV-Scanner configuration
+# Documentation : https://google.github.io/osv-scanner/configuration/
+#
+# Toute exemption ajoutée ici DOIT inclure :
+#   - une justification ("reason")
+#   - une date de revue ("ignoreUntil") <= 30 jours
+# La politique est définie en spec 003 §4.
+
+[[IgnoredVulns]]
+# id = "GHSA-xxxx-xxxx-xxxx"
+# ignoreUntil = "2026-06-18"
+# reason = "..."
