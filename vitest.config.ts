@@ -26,6 +26,9 @@ export default defineConfig({
         "src/**/*.d.ts",
         "src/pages/**/*.astro",
         "src/layouts/**/*.astro",
+        // Composants larges, testés via E2E Playwright (CLAUDE.md §7)
+        "src/components/ScreeningFlow.tsx",
+        "src/components/ResultView.tsx",
       ],
       thresholds: {
         lines: 90,
