@@ -25,6 +25,11 @@ numéroté et daté.
 | 002 | Modèle économique & funnel de conversion | proposé | 2026-05-18 |
 | 003 | Qualité logicielle, CI/CD & garde-fous | proposé | 2026-05-18 |
 
+## Documents transverses (non numérotés)
+
+- `architecture.md` : document vivant sur l'état courant et la trajectoire
+  technique. Mis à jour à chaque spec qui touche l'infra.
+
 ## Liens utiles
 
 - README racine : démarrage, stack, scoring
