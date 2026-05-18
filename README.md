@@ -1,0 +1,86 @@
+# Attention & Fonctionnement Cognitif — Screener
+
+Outil web d'auto-évaluation attentionnelle basé sur l'**ASRS v1.1** (OMS).
+**Non médical, non diagnostique.**
+
+## Vision produit
+
+Funnel en 2 étages :
+
+1. **Screening rapide** — 6 questions (ASRS v1.1, Partie A)
+2. **Questionnaire complet** — 12 questions ASRS supplémentaires + 5 questions
+   de contexte (impact travail / quotidien / temps / oubli / stress)
+3. **Lecture structurée** — score global + sous-scores par dimension
+   (attention / organisation / impulsivité) + impact fonctionnel + recommandations
+   non médicales
+
+Le produit ne vend pas un test : il vend une lecture compréhensible d'un
+screening validé scientifiquement.
+
+## Architecture
+
+- **Frontend** : Next.js 14 (App Router) + React 18 + TypeScript + Tailwind CSS
+- **Backend** : API routes Next.js, moteur de scoring déterministe pur
+- **Stockage** : aucun (état client uniquement, anonymisation totale)
+
+```
+app/
+  layout.tsx              wrapper + disclaimer permanent
+  page.tsx                flow : intro → screener → result → full → contextual → result
+  globals.css
+  api/
+    score/screener/route.ts   POST { answers } → ScreenerResult
+    score/full/route.ts       POST { asrsAnswers, contextualAnswers } → FullResult
+components/
+  Disclaimer.tsx, ProgressBar.tsx, QuestionCard.tsx, ResultView.tsx
+lib/
+  questions.ts            ASRS 18 items + 5 questions contextuelles
+  scoring.ts              moteur de scoring (screener + complet + dimensions)
+  interpretation.ts       textes pédagogiques + recommandations par niveau
+```
+
+## Logique de scoring
+
+Échelle ASRS — 0 (Jamais) à 4 (Très souvent).
+
+**Screener (6 items)**
+- 0–6 : signal faible
+- 7–12 : signal modéré
+- 13+ : signal élevé
+
+**Complet (18 items)** — score global normalisé sur le max (72) :
+- < 30 % : faible
+- 30–55 % : modéré
+- ≥ 55 % : élevé
+
+Mêmes seuils ratio appliqués aux sous-dimensions et au score contextuel.
+
+**Mapping ASRS → dimensions**
+- Attention : items 7, 8, 9, 10, 11
+- Organisation / exécution : items 1, 2, 3, 4
+- Impulsivité / agitation : items 5, 6, 12, 13, 14, 15, 16, 17, 18
+
+## Conformité
+
+- Disclaimer permanent (header + footer + entre chaque étape) : *outil non médical,
+  basé sur l'ASRS v1.1, ne constitue pas un diagnostic*.
+- Aucune mention « TDAH confirmé ».
+- Lorsque le signal est élevé : suggestion explicite de consulter un
+  professionnel + rappel « ce résultat ne constitue pas un diagnostic ».
+
+## Démarrage
+
+```bash
+npm install
+npm run dev
+```
+
+Application disponible sur http://localhost:3000.
+
+## Évolutions possibles (V2+)
+
+- Comparaison populationnelle anonymisée
+- Export PDF du profil
+- Suivi longitudinal
+- Recommandations personnalisées avancées
+- Version B2B (coaching / RH / accompagnement)
