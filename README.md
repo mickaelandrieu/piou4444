@@ -3,6 +3,9 @@
 Outil web d'auto-évaluation attentionnelle basé sur l'**ASRS v1.1** (OMS).
 **Non médical, non diagnostique.**
 
+> Source de vérité produit : voir [`specs/`](./specs). Chaque évolution
+> significative du produit est tracée sous forme d'une nouvelle spec numérotée.
+
 ## Vision produit
 
 Funnel en 2 étages :
@@ -84,3 +87,9 @@ Application disponible sur http://localhost:3000.
 - Suivi longitudinal
 - Recommandations personnalisées avancées
 - Version B2B (coaching / RH / accompagnement)
+
+## Faire évoluer le produit
+
+Toute évolution produit passe par une nouvelle entrée dans [`specs/`](./specs)
+(convention détaillée dans `specs/README.md`). On n'écrase pas l'historique :
+chaque spec cite et précise ce qu'elle remplace.
