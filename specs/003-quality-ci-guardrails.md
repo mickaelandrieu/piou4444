@@ -1,6 +1,6 @@
 # 003 — Qualité logicielle, CI/CD & garde-fous
 
-- **Statut** : proposé
+- **Statut** : livré
 - **Date** : 2026-05-18
 - **Remplace** : aucune. Insérée *avant* l'ancienne 003 (auth + paiement), qui
   devient 004. Justification : aucun code monétisé ne doit être introduit
