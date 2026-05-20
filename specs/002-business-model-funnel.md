@@ -1,12 +1,12 @@
 # 002 — Modèle économique & funnel de conversion
 
-- **Statut** : proposé
+- **Statut** : validé
 - **Date** : 2026-05-18
 - **Remplace** : aucune spec antérieure ; raffine 001 en ajoutant la couche
   monétisation et capture utilisateur sans toucher au moteur d'évaluation.
-- **Périmètre** : décisions produit/business uniquement. Ne traite pas
-  l'authentification ni la persistance du profil (→ spec 003), ni le dashboard
-  utilisateur (→ spec 004).
+- **Périmètre** : décisions produit/business uniquement. L'implémentation
+  technique (auth, paiement, email) est dans 004 ; le dashboard utilisateur
+  dans 005.
 
 ---
 
@@ -28,9 +28,15 @@ Trois décisions structurantes ont été arrêtées en amont :
 Les choix « captation email immédiate » et « accès limité » ont été pesés. La
 veille montre qu'une capture *à l'atterrissage* tue la conversion d'entrée
 (−40 à −60 % vs capture progressive). On garde donc l'intention (élargir la
-base de contacts pour la nurture marketing) mais on déplace le moment de
+base de contacts pour les relances marketing) mais on déplace le moment de
 capture juste après le screener gratuit — l'utilisateur a déjà investi 6
 questions et veut son résultat.
+
+**Pas de newsletter V1.** Les emails envoyés se limitent strictement à la
+suite logique du parcours : envoi du résultat, relances d'abandon, rappel de
+pré-expiration. Tous adossés à *exécution du contrat* ou *intérêt légitime*
+RGPD — aucun consentement opt-in séparé requis. Lien de désinscription
+obligatoire dans chaque email (cf. §5.3).
 
 ## 2. Objectifs de cette spec
 
@@ -38,7 +44,7 @@ questions et veut son résultat.
   trackés)
 - fixer **le prix, la durée d'accès, la TVA et la politique de remboursement**
 - choisir la **stack paiement et emailing** (build / buy)
-- spécifier les **workflows email** (transactionnel + relance marketing)
+- spécifier les **workflows email** (transactionnel + relances de cycle de vie)
 - énoncer les **métriques de succès** et l'instrumentation associée
 
 ## 3. Funnel détaillé
@@ -73,9 +79,10 @@ Landing
 fin classique)
 - Copy : *« Votre profil mérite une lecture détaillée. Entrez votre email
   pour continuer — vous recevrez aussi votre résultat par mail. »*
-- 1 seul champ (email), case RGPD pré-décochée pour la newsletter, double
-  opt-in **désactivé** sur ce flow (la suite du parcours sert de confirmation
-  implicite ; double opt-in réservé à l'inscription newsletter pure).
+- 1 seul champ (email). **Aucune case opt-in newsletter** (cf. §1 — pas de
+  newsletter V1). Mention claire sous le champ : *« Vous recevrez : votre
+  résultat, un éventuel rappel si vous interrompez le parcours, et un
+  rappel à l'expiration de l'accès. Désabonnement en un clic. »*
 - Évent : `email_captured { source: "screener_wall" }`.
 - Échap : lien discret *« continuer sans email »* qui laisse passer sans
   capture (anti-friction légale + UX). Évent : `email_capture_skipped`.
@@ -87,15 +94,15 @@ fin classique)
 **Étape E — Tease résultat**
 - Affiche : niveau global (1 mot) + 1 phrase pédagogique non clinique.
 - Le détail par axes, l'interprétation et les recommandations sont floutés.
-- CTA primaire : *« Débloquer ma lecture complète — 12,90 € »*.
+- CTA primaire : *« Débloquer ma lecture complète — 4,99 € »*.
 - CTA secondaire : *« Recevoir un rappel par email »* (envoie l'email D+1 si
-  pas d'achat ; cf §6.2 workflow Abandon).
+  pas d'achat ; cf §5.3 workflow M-03).
 - Évent : `paywall_view`.
 
 **Étape F — Stripe Checkout**
 - Stripe Checkout hébergé (pas custom V1). Stripe Tax activé.
 - Pas de création de compte demandée à cette étape — l'email Stripe sert
-  d'identifiant. Compte créé automatiquement après paiement (cf. spec 003).
+  d'identifiant. Compte créé automatiquement après paiement (cf. spec 004).
 - Évent : `checkout_started`, `checkout_completed { amount, currency }`,
   `checkout_abandoned`.
 
@@ -111,13 +118,19 @@ fin classique)
 
 | Paramètre | Valeur V1 | Justification |
 |---|---|---|
-| Prix | **12,90 € TTC** | Anchor entre gratuit et 49 €+ des évaluations en ligne complètes ; psychologiquement accessible, suffisamment au-dessus du seuil de gratuité perçue |
+| Prix | **4,99 € TTC** | Positionnement *impulse buy* — friction-prix minimisée pour maximiser le volume de conversions. Net après Stripe (~0,33 € de frais) ≈ 4,66 € |
 | Devise | EUR uniquement V1 | Marché cible FR-first, simplifie la TVA |
 | TVA | **Stripe Tax activé**, prix TTC affiché | Conformité UE automatique, OSS géré par Stripe |
 | Durée d'accès | **12 mois** à compter de la date de paiement | Pertinence clinique du re-test annuel ; copy : *« vos résultats restent accessibles 12 mois »*, pas *« accès limité »* |
 | Remboursement | Exception légale produit numérique : pas de rétractation dès que le **test complet est démarré** (clairement acceptée case obligatoire avant Stripe). Remboursement plein avant. | Conformité DGCCRF / Art. L221-28 13° du Code de la consommation |
 | Garantie qualité | Remboursement discrétionnaire 14 j en cas d'insatisfaction documentée (canal support unique) | Confiance ; coût absorbable au volume V1 |
 | Re-test | Achat séparé à plein tarif après expiration (V1). Pas de promo loyauté V1. | À revoir V2 selon volume |
+
+**Implication économique du prix à 4,99 €** : pour égaler le revenu cible
+d'un prix à 12,90 € (référence de l'étude initiale), il faut atteindre une
+conversion ~2,5× supérieure. À surveiller dans les premiers mois — si le
+taux de conversion réel ne suit pas, ajuster (5,99 € / 6,99 € restent dans
+la zone *impulse*).
 
 ## 5. Stack paiement & email
 
@@ -162,18 +175,23 @@ mentions légales + lien de désinscription en pied.
 | ID | Trigger | Délai | Objet | Contenu | Audience |
 |---|---|---|---|---|---|
 | `T-01` | `checkout.session.completed` | immédiat | Votre lecture est prête | Reçu + lien vers résultat complet (signé, 12 mois) | Acheteurs |
-| `T-02` | Réinitialisation mot de passe (spec 003) | immédiat | Réinitialiser votre accès | Lien sécurisé 1 h | Comptes |
+| `T-02` | Réinitialisation mot de passe (spec 004) | immédiat | Réinitialiser votre accès | Lien sécurisé 1 h | Comptes |
 | `M-01 Welcome` | `email_captured` (étape C) | immédiat | Votre résultat de screening | Résultat screener + invitation à compléter le test | Captés gratuits |
 | `M-02 Abandon screener→complet` | `email_captured` ∧ pas de `full_test_started` à J+1 | J+1 | Vous étiez à mi-chemin | Rappel + bénéfice pédagogique, pas de promo | Captés non engagés |
 | `M-03 Abandon paywall` | `paywall_view` ∧ pas de `checkout_completed` à H+1, J+1, J+3 | H+1 / J+1 / J+3 | (3 emails) | E1 = rappel ; E2 = social proof + FAQ ; E3 = réassurance (remboursement, conformité), **pas de discount** | Vue paywall sans achat |
 | `M-04 Pré-expiration accès` | `access_expires_at − 14 j` | J−14 puis J−1 | Vos résultats expirent bientôt | Invitation à re-tester (re-évaluation longitudinale) | Acheteurs |
-| `M-05 Newsletter` (opt-in explicite) | manuel / cadence mensuelle | — | Variable | Contenu pédagogique TDAH / attention | Opt-in newsletter uniquement |
+
+**Aucune newsletter V1.** Pas de campagne marketing récurrente, pas de
+contenu éditorial diffusé. Les seuls emails sortants sont les 6 ci-dessus,
+tous adossés au cycle de vie utilisateur (capture / abandon / expiration).
 
 Règles transverses :
 - **Pas de discount dans M-03**. La veille montre que l'introduction
   d'un discount précoce dégrade le LTV et entraîne l'attente.
-- **Désinscription** : un clic, audit log conservé 3 ans.
-- **Suppression sur demande** : workflow RGPD documenté dans spec 003.
+- **Lien de désinscription** dans chaque email (transactionnel inclus, sauf
+  T-01 — la loi exonère les emails strictement liés à l'exécution du
+  contrat, mais on l'ajoute par cohérence UX). Un clic, audit log 3 ans.
+- **Suppression sur demande** : workflow RGPD documenté dans spec 004.
 
 ## 6. Conformité & garde-fous
 
@@ -181,8 +199,9 @@ Règles transverses :
   rétractation, durée d'accès, support, remboursement discrétionnaire.
 - **Mentions légales** + **politique de confidentialité** mises à jour pour
   inclure : Stripe (sous-traitant paiement), Brevo (sous-traitant emailing),
-  base légale = exécution du contrat + intérêt légitime (relance achat) +
-  consentement (newsletter).
+  base légale = exécution du contrat (capture email + résultat + checkout)
+  + intérêt légitime (relances de cycle de vie : abandon, pré-expiration).
+  Pas de base *consentement* puisque pas de newsletter.
 - **Cookies** : bandeau conforme CNIL ; analytics consenti uniquement (cf.
   §7).
 - **Disclaimer médical 001 préservé partout**, y compris dans les emails.
@@ -191,7 +210,8 @@ Règles transverses :
 
 ### 7.1 Funnel cible V1 (hypothèses de référence, à valider)
 
-Pour 1 000 visiteurs landing :
+Pour 1 000 visiteurs landing — hypothèses ajustées au prix à 4,99 € (friction
+de paiement plus basse qu'à 12,90 €) :
 
 | Étape | Taux attendu | Volume |
 |---|---|---|
@@ -200,9 +220,15 @@ Pour 1 000 visiteurs landing :
 | `screener_completed` ∧ signal ≥ modéré | 65 % | ~330 |
 | Mur email → `email_captured` | 55 % | ~180 |
 | `email_captured` → `full_test_completed` | 60 % | ~108 |
-| `paywall_view` → `checkout_completed` | 20–25 % | ~22–27 |
-| Récup abandon paywall via M-03 (+ relatif) | +15 % | ~3–4 |
-| **Conversion globale visiteur → acheteur** | **~2,5–3,1 %** | 25–31 / 1 000 |
+| `paywall_view` → `checkout_completed` | **40–50 %** (lift attendu vs 20–25 % à 12,90 €) | ~43–54 |
+| Récup abandon paywall via M-03 (+ relatif) | +15 % | ~6–8 |
+| **Conversion globale visiteur → acheteur** | **~5–6 %** | 49–62 / 1 000 |
+| **Revenu brut V1** | × 4,99 € | **~245–310 € / 1 000 visiteurs** |
+
+Comparaison : à 12,90 €, la conversion projetée était ~2,5–3 % → ~322–400 €
+/ 1 000 visiteurs. À 4,99 € avec lift de conversion attendu, ~245–310 € →
+**~75 % du revenu de référence**, mais avec une base d'acheteurs ~2× plus
+large (utile pour le bouche-à-oreille, les avis, les retours produit).
 
 ### 7.2 Instrumentation
 
@@ -218,16 +244,19 @@ Pour 1 000 visiteurs landing :
 
 | Risque | Impact | Mitigation |
 |---|---|---|
-| Conversion paywall < 10 % | Modèle non viable | A/B copy CTA + tease ; descendre prix à 9,90 € avant de couper la feature |
+| Conversion paywall < 25 % (vs 40–50 % attendu à 4,99 €) | Modèle non viable | A/B copy CTA + tease ; tester remontée prix à 5,99 € / 6,99 € avant de couper la feature |
+| Prix perçu comme « trop bas » → impression de produit peu sérieux | Conversion bloquée par défiance | Travailler le copy de réassurance (caution scientifique ASRS, conformité, garantie) ; à monitorer dans les retours utilisateurs |
 | Deliverability Brevo dégradée sur transactionnel | Acheteurs ne reçoivent pas leur résultat | Monitoring taux d'arrivée hebdo ; swap vers Resend si < 98 % |
-| Plainte CNIL sur capture email progressive | Risque légal | Texte de mention claire au champ + opt-in newsletter séparé non pré-coché |
-| Confusion entre lien magique 12 mois et compte utilisateur | Support saturé | Création de compte auto post-paiement avec mot de passe envoyé (cf. spec 003) |
+| Plainte CNIL sur capture email progressive | Risque légal | Texte de mention claire au champ + finalité explicite + lien désinscription dans chaque email |
+| Confusion entre lien magique 12 mois et compte utilisateur | Support saturé | Création de compte auto post-paiement avec mot de passe envoyé (cf. spec 004) |
 | Re-vente du lien signé (résultats partagés) | Perte revenu marginale | Token lié au User + IP fingerprint soft ; tolérance V1 |
 
 ## 9. Hors périmètre (renvoyé à des specs ultérieures)
 
-- Authentification & gestion de compte → **spec 003**
-- Dashboard utilisateur, historique, export PDF → **spec 004**
+- Authentification, paiement, webhooks email → **spec 004**
+- Dashboard utilisateur, historique, export PDF, persistance → **spec 005**
+- Newsletter ou contenu éditorial — décision explicite : **non V1**, à
+  ré-examiner si une stratégie de contenu est lancée plus tard
 - Abonnement / pass familial / B2B → V2+
 - Multi-devises, marchés non-FR → V2+
 
@@ -235,11 +264,14 @@ Pour 1 000 visiteurs landing :
 
 La spec 002 est considérée livrée quand :
 
-- [ ] page de checkout en production avec Stripe Tax et CGV liées
+- [ ] page de checkout en production avec Stripe Tax, prix 4,99 € TTC affiché
+      et CGV liées
 - [ ] webhook `checkout.session.completed` idempotent et testé
-- [ ] mur de capture email opérationnel avec opt-in newsletter séparé
+- [ ] mur de capture email opérationnel **sans** case opt-in newsletter
+      (mention claire de la finalité des emails sous le champ)
 - [ ] workflows `T-01`, `M-01`, `M-02`, `M-03` (3 emails), `M-04` configurés
       dans Brevo et déclenchés par événements applicatifs
+- [ ] lien de désinscription présent dans **tous** les emails sortants
 - [ ] événements §3.2 émis et visibles dans l'outil analytics
 - [ ] disclaimer médical présent sur toutes les surfaces (landing, paywall,
       emails)

@@ -22,7 +22,7 @@ numéroté et daté.
 | # | Titre | Statut | Date |
 |---|---|---|---|
 | 001 | Vision produit initiale — Attention & Fonctionnement Cognitif Screener | livré (MVP) | 2026-05-18 |
-| 002 | Modèle économique & funnel de conversion | proposé | 2026-05-18 |
+| 002 | Modèle économique & funnel de conversion | validé | 2026-05-18 |
 | 003 | Qualité logicielle, CI/CD & garde-fous | livré | 2026-05-18 |
 
 ## Documents transverses (non numérotés)
